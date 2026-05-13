@@ -32,6 +32,10 @@ public class Asteroid : MonoBehaviour
     [Tooltip("Hit points this asteroid has before it is destroyed by player fire.")]
     [SerializeField] private int maxHealth = 2;
 
+    [Header("Crash Damage")]
+    [Tooltip("Damage dealt to the player if they crash into this asteroid.")]
+    [SerializeField] private int crashDamage = 1;
+
     [Header("VFX & Feedback")]
     [Tooltip("Explosion particle prefab spawned when the asteroid is destroyed.")]
     [SerializeField] private GameObject explosionPrefab;
@@ -44,6 +48,18 @@ public class Asteroid : MonoBehaviour
     private Vector3 driftVelocity;
     private Vector3 spinVelocity;
     private int currentHealth;
+
+    // Cached reference — avoids GetComponent every TakeDamage call
+    private DamageFlash damageFlash;
+
+    // -------------------------------------------------------------------------
+    // Unity Lifecycle
+    // -------------------------------------------------------------------------
+
+    private void Awake()
+    {
+        damageFlash = GetComponent<DamageFlash>();
+    }
 
     private void Start()
     {
@@ -89,6 +105,23 @@ public class Asteroid : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
+    // Collision
+    // -------------------------------------------------------------------------
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            PlayerStats playerStats = other.GetComponent<PlayerStats>();
+            if (playerStats != null)
+            {
+                playerStats.TakeDamage(crashDamage);
+                Die(); // Destroy self after crashing into the player
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Combat
     // -------------------------------------------------------------------------
 
@@ -96,9 +129,15 @@ public class Asteroid : MonoBehaviour
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
+
         if (currentHealth <= 0)
         {
             Die();
+        }
+        else
+        {
+            // Still alive — flash to signal the hit
+            damageFlash?.Flash();
         }
     }
 

@@ -50,6 +50,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Slider energySlider;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI timeText;
+    [SerializeField] private TextMeshProUGUI hudEnemiesText;
 
     // -------------------------------------------------------------------------
     // Game Over Panel References
@@ -131,7 +132,7 @@ public class UIManager : MonoBehaviour
     // -------------------------------------------------------------------------
 
     /// <summary>Call this every frame (or on change) from PlayerStats to keep HUD current.</summary>
-    public void UpdateHUD(float currentHealth, float maxHealth, float currentEnergy, float maxEnergy, int score, float time)
+    public void UpdateHUD(float currentHealth, float maxHealth, float currentEnergy, float maxEnergy, int score, float time, int enemiesDefeated)
     {
         if (healthSlider != null)
         {
@@ -150,6 +151,9 @@ public class UIManager : MonoBehaviour
 
         if (timeText != null)
             timeText.text = FormatTime(time);
+
+        if (hudEnemiesText != null)
+            hudEnemiesText.text = $"ENEMIES  {enemiesDefeated}";
     }
 
     /// <summary>Refreshes only the score text (called by GameManager.AddScore for efficiency).</summary>

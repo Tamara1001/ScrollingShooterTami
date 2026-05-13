@@ -155,7 +155,8 @@ public class GameManager : MonoBehaviour
                 playerStats.CurrentHealth, playerStats.MaxHealth,
                 playerStats.CurrentEnergy, playerStats.MaxEnergy,
                 CurrentScore,
-                CurrentTime
+                CurrentTime,
+                EnemiesDefeated
             );
         }
 

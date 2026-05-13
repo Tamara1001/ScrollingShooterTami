@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7597001892817155885}
   - component: {fileID: 5749391501066450264}
   - component: {fileID: 5304042367749064495}
+  - component: {fileID: 8847707098036259558}
   m_Layer: 0
   m_Name: Asteroid
   m_TagString: Asteroid
@@ -137,3 +138,17 @@ MonoBehaviour:
   explosionPrefab: {fileID: 8614319601977404343, guid: 3d012289ba55ed6489f578e6e944d527, type: 3}
   shakeDuration: 0.15
   shakeMagnitude: 0.15
+--- !u!114 &8847707098036259558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7548675550876840588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a00da49cb05298b4cbcc6ca2a0e44e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageFlash
+  flashMaterial: {fileID: 2100000, guid: 1253d7e377eecfa4babf93cd70eaf0ed, type: 2}
+  flashDuration: 0.08

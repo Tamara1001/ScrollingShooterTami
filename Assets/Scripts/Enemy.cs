@@ -60,6 +60,12 @@ public class Enemy : MonoBehaviour
     [Tooltip("Magnitude (world-unit displacement) of the camera shake on enemy death.")]
     [SerializeField] private float shakeMagnitude = 0.3f;
 
+    [Header("Highlighting & Collision")]
+    [Tooltip("Material used when the player's laser sight targets this enemy.")]
+    [SerializeField] private Material targetedMaterial;
+    [Tooltip("Damage dealt to the player if they crash into this enemy.")]
+    [SerializeField] private int crashDamage = 1;
+
     [Header("References")]
     [Tooltip("The player's Transform – used to calculate alignment.")]
     [SerializeField] private Transform playerTransform;
@@ -68,13 +74,31 @@ public class Enemy : MonoBehaviour
     // Private State
     // -------------------------------------------------------------------------
 
-    private bool      isInFleePhase    = false;
-    private bool      isShooting       = false;
-    private Coroutine shootingCoroutine = null;
+    private bool      isInFleePhase     = false;
+    private bool      isShooting        = false;
+    private int       currentBurstCount  = 0;
+    private Coroutine shootingCoroutine;
+
+    // Cached reference — avoids GetComponent every TakeDamage call
+    private DamageFlash damageFlash;
+    private Material    originalMaterial;
+    private MeshRenderer meshRenderer;
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
     // -------------------------------------------------------------------------
+
+    private void Awake()
+    {
+        // Cache the DamageFlash component (may be null if not added to this prefab)
+        damageFlash = GetComponent<DamageFlash>();
+
+        meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            originalMaterial = meshRenderer.sharedMaterial;
+        }
+    }
 
     private void Start()
     {
@@ -109,6 +133,31 @@ public class Enemy : MonoBehaviour
         else
         {
             RunHoverPhase();
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Collision & Highlighting
+    // -------------------------------------------------------------------------
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            PlayerStats playerStats = other.GetComponent<PlayerStats>();
+            if (playerStats != null)
+            {
+                playerStats.TakeDamage(crashDamage);
+                Die(); // Destroy self after crashing into player
+            }
+        }
+    }
+
+    public void SetTargeted(bool isTargeted)
+    {
+        if (meshRenderer != null && targetedMaterial != null && originalMaterial != null)
+        {
+            meshRenderer.sharedMaterial = isTargeted ? targetedMaterial : originalMaterial;
         }
     }
 
@@ -222,9 +271,15 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
+
         if (health <= 0)
         {
             Die();
+        }
+        else
+        {
+            // Still alive — flash to signal the hit without dying
+            damageFlash?.Flash();
         }
     }
 

@@ -20,6 +20,22 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2c548e388108b864aafb146ecd87e816, type: 2}
+    - target: {fileID: 4108836637968289057, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2c548e388108b864aafb146ecd87e816, type: 2}
+    - target: {fileID: 4108836637968289057, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
+      propertyPath: m_Parameters.colorGradient.key0.b
+      value: 0.81568635
+      objectReference: {fileID: 0}
+    - target: {fileID: 4108836637968289057, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
+      propertyPath: m_Parameters.colorGradient.key0.g
+      value: 0.81568635
+      objectReference: {fileID: 0}
+    - target: {fileID: 4108836637968289057, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
+      propertyPath: m_Parameters.colorGradient.key0.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5650595043728592095, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
       propertyPath: m_Name
       value: CyanEnemy

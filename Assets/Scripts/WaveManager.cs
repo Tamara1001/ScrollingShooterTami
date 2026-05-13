@@ -34,10 +34,10 @@ public class WaveManager : MonoBehaviour
     [Header("Spawn Area")]
     [Tooltip("The Z distance at which enemies and asteroids are spawned (far from the player).")]
     [SerializeField] private float spawnZDistance = 80f;
-    [Tooltip("The half-width of the spawn corridor on the X axis (spawns between -X and +X).")]
-    [SerializeField] private float spawnRangeX = 18f;
-    [Tooltip("The half-height of the spawn corridor on the Y axis (spawns between -Y and +Y).")]
-    [SerializeField] private float spawnRangeY = 10f;
+    [Tooltip("The half-width and height of the spawn corridor for enemies (X, Y).")]
+    [SerializeField] private Vector2 enemySpawnRange = new Vector2(18f, 10f);
+    [Tooltip("The half-width and height of the spawn corridor for asteroids (kept smaller to be reachable).")]
+    [SerializeField] private Vector2 asteroidSpawnRange = new Vector2(9.5f, 5f);
 
     [Header("Difficulty – Spawn Rate")]
     [Tooltip("Time between enemy spawns at the very start of the game (seconds).")]
@@ -217,7 +217,7 @@ public class WaveManager : MonoBehaviour
         if (enemyPrefabs.Count == 0) return;
 
         GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
-        Vector3 spawnPos  = GetRandomSpawnPosition();
+        Vector3 spawnPos  = GetRandomSpawnPosition(enemySpawnRange);
 
         GameObject enemy = Instantiate(prefab, spawnPos, Quaternion.identity);
         activeEnemies.Add(enemy);
@@ -228,17 +228,17 @@ public class WaveManager : MonoBehaviour
         if (asteroidPrefabs.Count == 0) return;
 
         GameObject prefab   = asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)];
-        Vector3 spawnPos    = GetRandomSpawnPosition();
+        Vector3 spawnPos    = GetRandomSpawnPosition(asteroidSpawnRange);
 
         GameObject asteroid = Instantiate(prefab, spawnPos, Random.rotation);
         activeAsteroids.Add(asteroid);
     }
 
-    /// <summary>Returns a random world position within the spawn corridor at the far Z distance.</summary>
-    private Vector3 GetRandomSpawnPosition()
+    /// <summary>Returns a random world position within the given spawn corridor at the far Z distance.</summary>
+    private Vector3 GetRandomSpawnPosition(Vector2 range)
     {
-        float x = Random.Range(-spawnRangeX, spawnRangeX);
-        float y = Random.Range(-spawnRangeY, spawnRangeY);
+        float x = Random.Range(-range.x, range.x);
+        float y = Random.Range(-range.y, range.y);
         return new Vector3(x, y, spawnZDistance);
     }
 
@@ -272,7 +272,11 @@ public class WaveManager : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Vector3 center = new Vector3(0f, 0f, spawnZDistance);
-        Vector3 size   = new Vector3(spawnRangeX * 2f, spawnRangeY * 2f, 0.5f);
-        Gizmos.DrawWireCube(center, size);
+        Vector3 enemySize = new Vector3(enemySpawnRange.x * 2f, enemySpawnRange.y * 2f, 0.5f);
+        Gizmos.DrawWireCube(center, enemySize);
+
+        Gizmos.color = Color.gray;
+        Vector3 asteroidSize = new Vector3(asteroidSpawnRange.x * 2f, asteroidSpawnRange.y * 2f, 0.5f);
+        Gizmos.DrawWireCube(center, asteroidSize);
     }
 }

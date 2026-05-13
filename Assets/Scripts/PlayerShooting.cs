@@ -24,8 +24,13 @@ public class PlayerShooting : MonoBehaviour
     [Header("References")]
     [Tooltip("Reference to the PlayerStats component on this ship. Used to check overheat and consume energy.")]
     [SerializeField] private PlayerStats playerStats;
+    [Tooltip("Optional LineRenderer to act as a laser sight.")]
+    [SerializeField] private LineRenderer laserSight;
+
+    [SerializeField] private LineRenderer laserSight;
 
     private float nextFireTime;
+    private Enemy lastTargetedEnemy;
 
     private void Awake()
     {
@@ -84,6 +89,41 @@ public class PlayerShooting : MonoBehaviour
             {
                 TryFirePrimary();
             }
+        }
+
+        if (laserSight != null && firePoint != null)
+        {
+            laserSight.SetPosition(0, firePoint.position);
+
+            if (Physics.Raycast(firePoint.position, Vector3.forward, out RaycastHit hit, 150f) && hit.collider.CompareTag("Enemy"))
+            {
+                laserSight.SetPosition(1, hit.point);
+
+                Enemy hitEnemy = hit.collider.GetComponent<Enemy>();
+                if (hitEnemy != null)
+                {
+                    if (lastTargetedEnemy != hitEnemy)
+                    {
+                        ClearTarget();
+                        lastTargetedEnemy = hitEnemy;
+                        lastTargetedEnemy.SetTargeted(true);
+                    }
+                }
+            }
+            else
+            {
+                laserSight.SetPosition(1, firePoint.position + Vector3.forward * 150f);
+                ClearTarget();
+            }
+        }
+    }
+
+    private void ClearTarget()
+    {
+        if (lastTargetedEnemy != null)
+        {
+            lastTargetedEnemy.SetTargeted(false);
+            lastTargetedEnemy = null;
         }
     }
 

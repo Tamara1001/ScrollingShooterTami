@@ -65,7 +65,8 @@ public class PlayerStats : MonoBehaviour
                 CurrentHealth, maxHealth,
                 CurrentEnergy, maxEnergy,
                 GameManager.Instance.CurrentScore,
-                GameManager.Instance.CurrentTime
+                GameManager.Instance.CurrentTime,
+                GameManager.Instance.EnemiesDefeated
             );
         }
     }
@@ -138,6 +139,11 @@ public class PlayerStats : MonoBehaviour
         if (CurrentHealth <= 0)
         {
             Die();
+        }
+        else
+        {
+            CameraShake.Instance?.Shake(0.2f, 0.4f);
+            GetComponent<DamageFlash>()?.Flash();
         }
     }
 
