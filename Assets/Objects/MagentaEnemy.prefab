@@ -12,6 +12,14 @@ PrefabInstance:
       propertyPath: enemyColor
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 638002977735039019, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
+      propertyPath: bulletMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 1019962b87a478c4094eab744bb20471, type: 2}
+    - target: {fileID: 638002977735039019, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
+      propertyPath: explosionPrefab
+      value: 
+      objectReference: {fileID: 109450189158767088, guid: 5404bfe84b73f7e4bb387c2818e4160f, type: 3}
     - target: {fileID: 2739667371067397040, guid: a8d2b425a5f78104a80f47fc422db272, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

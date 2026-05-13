@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 09c0e47c26ab07c4aa69c1086b7f14bf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -134,3 +134,6 @@ MonoBehaviour:
   maxSpinSpeed: 90
   destroyBehindZ: -15
   maxHealth: 2
+  explosionPrefab: {fileID: 8614319601977404343, guid: 3d012289ba55ed6489f578e6e944d527, type: 3}
+  shakeDuration: 0.15
+  shakeMagnitude: 0.15

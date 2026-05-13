@@ -66,4 +66,17 @@ public class Projectile : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Overrides the visual material of this projectile at runtime.
+    /// Call immediately after Instantiate() to colour-code bullets by owner.
+    /// </summary>
+    public void SetMaterial(Material mat)
+    {
+        if (mat == null) return;
+
+        MeshRenderer mr = GetComponent<MeshRenderer>();
+        if (mr != null)
+            mr.material = mat;
+    }
 }

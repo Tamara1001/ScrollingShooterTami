@@ -43,12 +43,22 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject projectilePrefab;
     [Tooltip("The transform from which enemy projectiles are spawned.")]
     [SerializeField] private Transform firePoint;
+    [Tooltip("Material applied to each enemy bullet on spawn. Use NeonMagenta or NeonCyan.")]
+    [SerializeField] private Material bulletMaterial;
     [Tooltip("Number of shots per burst.")]
     [SerializeField] private int burstSize = 5;
     [Tooltip("Time between individual shots within a burst (seconds).")]
     [SerializeField] private float timeBetweenShots = 0.12f;
     [Tooltip("Cooldown (seconds) before the next burst can start after one finishes.")]
     [SerializeField] private float reloadCooldown = 3f;
+
+    [Header("VFX & Feedback")]
+    [Tooltip("Explosion particle prefab spawned on death. Use Explosion_Cyan or Explosion_Magenta.")]
+    [SerializeField] private GameObject explosionPrefab;
+    [Tooltip("Duration of the camera shake triggered on enemy death.")]
+    [SerializeField] private float shakeDuration  = 0.25f;
+    [Tooltip("Magnitude (world-unit displacement) of the camera shake on enemy death.")]
+    [SerializeField] private float shakeMagnitude = 0.3f;
 
     [Header("References")]
     [Tooltip("The player's Transform – used to calculate alignment.")]
@@ -198,13 +208,13 @@ public class Enemy : MonoBehaviour
         // Instantiate the projectile at the fire point with no rotation
         GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
 
-        // Use the updated Projectile API to set direction and ownership cleanly.
-        // Enemy bullets travel in negative Z (towards the player).
+        // Use the updated Projectile API to set direction, ownership, and colour
         Projectile projScript = proj.GetComponent<Projectile>();
         if (projScript != null)
         {
             projScript.moveDirection = Vector3.back;
             projScript.isPlayerOwned = false;
+            projScript.SetMaterial(bulletMaterial);
         }
     }
 
@@ -223,7 +233,14 @@ public class Enemy : MonoBehaviour
         // Award score and increment kill counter via GameManager
         GameManager.Instance?.RegisterEnemyKill();
 
-        // TODO: Trigger explosion VFX, play sound here
+        // Spawn explosion VFX at this enemy's position.
+        // The prefab's StopAction = Destroy, so it cleans itself up automatically.
+        if (explosionPrefab != null)
+            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+
+        // Trigger camera shake for impact feel
+        CameraShake.Instance?.Shake(shakeDuration, shakeMagnitude);
+
         Destroy(gameObject);
     }
 

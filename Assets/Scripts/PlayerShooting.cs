@@ -8,6 +8,8 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private GameObject projectilePrefab;
     [Tooltip("The transform from which projectiles will be spawned (usually the tip of the ship).")]
     [SerializeField] private Transform firePoint;
+    [Tooltip("Material applied to each player laser on spawn. Use NeonCyan or NeonWhite.")]
+    [SerializeField] private Material laserMaterial;
 
     [Header("Primary Fire Settings")]
     [Tooltip("Time in seconds between consecutive shots.")]
@@ -108,7 +110,14 @@ public class PlayerShooting : MonoBehaviour
 
         if (projectilePrefab != null && firePoint != null)
         {
-            Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+            GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+
+            // Apply the laser's visual material immediately after spawning
+            if (laserMaterial != null)
+            {
+                Projectile projScript = proj.GetComponent<Projectile>();
+                projScript?.SetMaterial(laserMaterial);
+            }
         }
         else
         {

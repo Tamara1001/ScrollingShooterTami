@@ -23,6 +23,14 @@ public class PlayerStats : MonoBehaviour
     [Tooltip("How many seconds the player cannot fire after the energy bar hits zero.")]
     [SerializeField] private float overheatPenaltyDuration = 3f;
 
+    [Header("VFX & Feedback")]
+    [Tooltip("Explosion particle prefab spawned when the player dies. Use Explosion_White.")]
+    [SerializeField] private GameObject explosionPrefab;
+    [Tooltip("Duration of the camera shake on player death.")]
+    [SerializeField] private float deathShakeDuration  = 0.4f;
+    [Tooltip("Magnitude of the camera shake on player death (strongest in the game).")]
+    [SerializeField] private float deathShakeMagnitude = 0.6f;
+
     // -------------------------------------------------------------------------
     // Public Read-Only State (for UI, etc.)
     // -------------------------------------------------------------------------
@@ -135,6 +143,13 @@ public class PlayerStats : MonoBehaviour
 
     private void Die()
     {
+        // Spawn death explosion VFX at the ship's current world position
+        if (explosionPrefab != null)
+            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+
+        // Strongest camera shake in the game — signals a high-stakes moment
+        CameraShake.Instance?.Shake(deathShakeDuration, deathShakeMagnitude);
+
         // Notify the GameManager — it will handle the panel transition
         Debug.Log("[PlayerStats] Player has died.");
         GameManager.Instance?.TriggerGameOver();

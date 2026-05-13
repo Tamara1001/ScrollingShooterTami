@@ -69,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 09c0e47c26ab07c4aa69c1086b7f14bf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -137,9 +137,13 @@ MonoBehaviour:
   destroyBehindZ: -15
   projectilePrefab: {fileID: 4033775015024879170, guid: 6e3053709197d9945ba46d416e8c5409, type: 3}
   firePoint: {fileID: 2326811924781179836}
+  bulletMaterial: {fileID: 2100000, guid: 09c0e47c26ab07c4aa69c1086b7f14bf, type: 2}
   burstSize: 5
   timeBetweenShots: 0.5
   reloadCooldown: 3
+  explosionPrefab: {fileID: 8614319601977404343, guid: 3d012289ba55ed6489f578e6e944d527, type: 3}
+  shakeDuration: 0.25
+  shakeMagnitude: 0.3
   playerTransform: {fileID: 0}
 --- !u!1 &6623496646698185948
 GameObject:

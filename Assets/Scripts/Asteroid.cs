@@ -32,6 +32,14 @@ public class Asteroid : MonoBehaviour
     [Tooltip("Hit points this asteroid has before it is destroyed by player fire.")]
     [SerializeField] private int maxHealth = 2;
 
+    [Header("VFX & Feedback")]
+    [Tooltip("Explosion particle prefab spawned when the asteroid is destroyed.")]
+    [SerializeField] private GameObject explosionPrefab;
+    [Tooltip("Duration of camera shake on asteroid death.")]
+    [SerializeField] private float shakeDuration  = 0.15f;
+    [Tooltip("Magnitude of camera shake on asteroid death (lighter than enemy shake).")]
+    [SerializeField] private float shakeMagnitude = 0.15f;
+
     private float forwardSpeed;
     private Vector3 driftVelocity;
     private Vector3 spinVelocity;
@@ -99,7 +107,13 @@ public class Asteroid : MonoBehaviour
         // Award score via GameManager
         GameManager.Instance?.RegisterAsteroidKill();
 
-        // TODO: Spawn debris VFX, play impact sound
+        // Spawn debris VFX
+        if (explosionPrefab != null)
+            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+
+        // Light camera shake — less intense than enemy death
+        CameraShake.Instance?.Shake(shakeDuration, shakeMagnitude);
+
         Destroy(gameObject);
     }
 }
