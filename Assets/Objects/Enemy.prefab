@@ -138,7 +138,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4033775015024879170, guid: 6e3053709197d9945ba46d416e8c5409, type: 3}
   firePoint: {fileID: 2326811924781179836}
   burstSize: 5
-  timeBetweenShots: 0.12
+  timeBetweenShots: 0.5
   reloadCooldown: 3
   playerTransform: {fileID: 0}
 --- !u!1 &6623496646698185948

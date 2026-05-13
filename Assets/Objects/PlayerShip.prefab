@@ -102,7 +102,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 1253d7e377eecfa4babf93cd70eaf0ed, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -213,3 +213,4 @@ MonoBehaviour:
   fireRate: 0.15
   primaryFireAction: {fileID: 5669652061844592389, guid: f7ea9a43239177b4d945fdce7c69e1cd, type: 3}
   secondaryFireAction: {fileID: 3228729108644196888, guid: f7ea9a43239177b4d945fdce7c69e1cd, type: 3}
+  playerStats: {fileID: 0}
