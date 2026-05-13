@@ -27,8 +27,6 @@ public class PlayerShooting : MonoBehaviour
     [Tooltip("Optional LineRenderer to act as a laser sight.")]
     [SerializeField] private LineRenderer laserSight;
 
-    [SerializeField] private LineRenderer laserSight;
-
     private float nextFireTime;
     private Enemy lastTargetedEnemy;
 

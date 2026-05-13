@@ -108,7 +108,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -135,6 +135,7 @@ MonoBehaviour:
   maxSpinSpeed: 90
   destroyBehindZ: -15
   maxHealth: 2
+  crashDamage: 1
   explosionPrefab: {fileID: 8614319601977404343, guid: 3d012289ba55ed6489f578e6e944d527, type: 3}
   shakeDuration: 0.15
   shakeMagnitude: 0.15

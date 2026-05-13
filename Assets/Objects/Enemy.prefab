@@ -297,6 +297,8 @@ MonoBehaviour:
   explosionPrefab: {fileID: 8614319601977404343, guid: 3d012289ba55ed6489f578e6e944d527, type: 3}
   shakeDuration: 0.25
   shakeMagnitude: 0.3
+  targetedMaterial: {fileID: 2100000, guid: 09c0e47c26ab07c4aa69c1086b7f14bf, type: 2}
+  crashDamage: 1
   playerTransform: {fileID: 0}
 --- !u!114 &-4722775137990293940
 MonoBehaviour:
