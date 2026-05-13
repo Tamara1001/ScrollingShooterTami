@@ -5,6 +5,23 @@ using UnityEngine;
 public class WaveManager : MonoBehaviour
 {
     // -------------------------------------------------------------------------
+    // Singleton
+    // -------------------------------------------------------------------------
+
+    public static WaveManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    // -------------------------------------------------------------------------
     // Inspector Fields
     // -------------------------------------------------------------------------
 
@@ -44,9 +61,16 @@ public class WaveManager : MonoBehaviour
     // Private State
     // -------------------------------------------------------------------------
 
-    // We track live enemies with a list so we can count them accurately
-    // (using FindObjectsByType every frame would be expensive).
-    private readonly List<GameObject> activeEnemies = new List<GameObject>();
+    // Tracks all live enemies so we can count and clean them up without FindObjectsByType.
+    private readonly List<GameObject> activeEnemies   = new List<GameObject>();
+    // Tracks all live asteroids so ResetWaves() can destroy them cleanly.
+    private readonly List<GameObject> activeAsteroids = new List<GameObject>();
+
+    private Coroutine enemySpawnCoroutine;
+    private Coroutine asteroidSpawnCoroutine;
+
+    // Separate elapsed time tracker so difficulty resets properly on ResetWaves()
+    private float playTime = 0f;
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -60,8 +84,67 @@ public class WaveManager : MonoBehaviour
         if (asteroidPrefabs.Count == 0)
             Debug.LogWarning("[WaveManager] No asteroid prefabs assigned!");
 
-        StartCoroutine(EnemySpawnLoop());
-        StartCoroutine(AsteroidSpawnLoop());
+        // Start both loops — they will idle until GameState == Playing
+        enemySpawnCoroutine   = StartCoroutine(EnemySpawnLoop());
+        asteroidSpawnCoroutine = StartCoroutine(AsteroidSpawnLoop());
+    }
+
+    private void Update()
+    {
+        // Only advance the difficulty timer while actually playing
+        if (GameManager.Instance?.CurrentState == GameManager.GameState.Playing)
+        {
+            playTime += Time.deltaTime;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Destroys every tracked enemy and asteroid in the scene and resets spawn timers.
+    /// Call this from GameManager.StartGame() before transitioning to the Playing state.
+    /// </summary>
+    public void ResetWaves()
+    {
+        // 1. Stop the running spawn coroutines so nothing new is spawned mid-reset
+        if (enemySpawnCoroutine   != null) StopCoroutine(enemySpawnCoroutine);
+        if (asteroidSpawnCoroutine != null) StopCoroutine(asteroidSpawnCoroutine);
+        enemySpawnCoroutine   = null;
+        asteroidSpawnCoroutine = null;
+
+        // 2. Destroy every enemy in our tracked list
+        foreach (GameObject enemy in activeEnemies)
+        {
+            if (enemy != null) Destroy(enemy);
+        }
+        activeEnemies.Clear();
+
+        // 3. Destroy every asteroid in our tracked list
+        foreach (GameObject asteroid in activeAsteroids)
+        {
+            if (asteroid != null) Destroy(asteroid);
+        }
+        activeAsteroids.Clear();
+
+        // 4. Safety sweep: catch any hazards that exist in the scene but were
+        //    never added to our lists (e.g. manually placed in editor, or spawned
+        //    by a code path we missed).
+        foreach (GameObject stray in GameObject.FindGameObjectsWithTag("Enemy"))
+            Destroy(stray);
+
+        foreach (GameObject stray in GameObject.FindGameObjectsWithTag("Asteroid"))
+            Destroy(stray);
+
+        // 5. Reset the difficulty timer so the next round starts at initial difficulty
+        playTime = 0f;
+
+        // 6. Restart the loops — they will immediately idle until GameState == Playing
+        enemySpawnCoroutine   = StartCoroutine(EnemySpawnLoop());
+        asteroidSpawnCoroutine = StartCoroutine(AsteroidSpawnLoop());
+
+        Debug.Log("[WaveManager] Board cleared and spawn loops restarted.");
     }
 
     // -------------------------------------------------------------------------
@@ -73,10 +156,21 @@ public class WaveManager : MonoBehaviour
     {
         while (true)
         {
+            // Idle until we are in the Playing state — this is the core state guard
+            if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+            {
+                yield return null; // wait one frame and check again
+                continue;
+            }
+
             float interval = GetCurrentEnemyInterval();
             yield return new WaitForSeconds(interval);
 
-            // Clean up any destroyed enemies from our tracking list before checking the count
+            // Re-check after waiting — state may have changed (e.g., player died mid-interval)
+            if (GameManager.Instance?.CurrentState != GameManager.GameState.Playing)
+                continue;
+
+            // Clean up destroyed entries before checking the count
             activeEnemies.RemoveAll(e => e == null);
 
             if (activeEnemies.Count < maxActiveEnemies)
@@ -85,8 +179,7 @@ public class WaveManager : MonoBehaviour
             }
             else
             {
-                // Screen is too crowded — wait a short beat before checking again
-                // instead of a full interval, so we react quickly when enemies leave
+                // Too crowded — brief pause before checking again
                 yield return new WaitForSeconds(1f);
             }
         }
@@ -97,8 +190,19 @@ public class WaveManager : MonoBehaviour
     {
         while (true)
         {
+            // Idle until we are in the Playing state
+            if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+            {
+                yield return null;
+                continue;
+            }
+
             float interval = GetCurrentAsteroidInterval();
             yield return new WaitForSeconds(interval);
+
+            // Re-check after waiting
+            if (GameManager.Instance?.CurrentState != GameManager.GameState.Playing)
+                continue;
 
             SpawnAsteroid();
         }
@@ -113,7 +217,7 @@ public class WaveManager : MonoBehaviour
         if (enemyPrefabs.Count == 0) return;
 
         GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
-        Vector3 spawnPos = GetRandomSpawnPosition();
+        Vector3 spawnPos  = GetRandomSpawnPosition();
 
         GameObject enemy = Instantiate(prefab, spawnPos, Quaternion.identity);
         activeEnemies.Add(enemy);
@@ -123,10 +227,11 @@ public class WaveManager : MonoBehaviour
     {
         if (asteroidPrefabs.Count == 0) return;
 
-        GameObject prefab = asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)];
-        Vector3 spawnPos = GetRandomSpawnPosition();
+        GameObject prefab   = asteroidPrefabs[Random.Range(0, asteroidPrefabs.Count)];
+        Vector3 spawnPos    = GetRandomSpawnPosition();
 
-        Instantiate(prefab, spawnPos, Random.rotation);
+        GameObject asteroid = Instantiate(prefab, spawnPos, Random.rotation);
+        activeAsteroids.Add(asteroid);
     }
 
     /// <summary>Returns a random world position within the spawn corridor at the far Z distance.</summary>
@@ -143,30 +248,28 @@ public class WaveManager : MonoBehaviour
 
     /// <summary>
     /// Calculates the current enemy spawn interval based on time played.
-    /// Uses a linear lerp from the initial interval down to the minimum,
-    /// clamped so it never goes below <see cref="minEnemySpawnInterval"/>.
+    /// Uses playTime (our own counter) instead of Time.timeSinceLevelLoad so
+    /// difficulty resets correctly when ResetWaves() is called.
     /// </summary>
     private float GetCurrentEnemyInterval()
     {
-        // t goes from 0.0 (start) to 1.0 (full difficulty reached)
-        float t = Mathf.Clamp01(Time.timeSinceLevelLoad / difficultyRampDuration);
+        float t = Mathf.Clamp01(playTime / difficultyRampDuration);
         return Mathf.Lerp(initialEnemySpawnInterval, minEnemySpawnInterval, t);
     }
 
     /// <summary>Calculates the current asteroid spawn interval based on time played.</summary>
     private float GetCurrentAsteroidInterval()
     {
-        float t = Mathf.Clamp01(Time.timeSinceLevelLoad / difficultyRampDuration);
+        float t = Mathf.Clamp01(playTime / difficultyRampDuration);
         return Mathf.Lerp(initialAsteroidSpawnInterval, minAsteroidSpawnInterval, t);
     }
 
     // -------------------------------------------------------------------------
-    // Debug Gizmos (visible in Scene view, not in Game view)
+    // Debug Gizmos (visible in Scene view only)
     // -------------------------------------------------------------------------
 
     private void OnDrawGizmosSelected()
     {
-        // Draw a wire box showing the spawn corridor in the Scene view for easy tuning
         Gizmos.color = Color.yellow;
         Vector3 center = new Vector3(0f, 0f, spawnZDistance);
         Vector3 size   = new Vector3(spawnRangeX * 2f, spawnRangeY * 2f, 0.5f);

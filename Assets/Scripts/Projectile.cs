@@ -11,8 +11,12 @@ public class Projectile : MonoBehaviour
     [Header("Ownership & Direction")]
     [Tooltip("The direction this projectile will travel in world space. Default is Vector3.forward (positive Z) for player bullets.")]
     public Vector3 moveDirection = Vector3.forward;
-    [Tooltip("True if this bullet was fired by the player. Used by collision scripts to determine what it can damage.")]
+    [Tooltip("True if this bullet was fired by the player. Used by collision logic to determine what it can damage.")]
     public bool isPlayerOwned = true;
+
+    [Header("Combat")]
+    [Tooltip("How much damage this projectile deals on impact.")]
+    public int damage = 1;
 
     private void Start()
     {
@@ -22,8 +26,44 @@ public class Projectile : MonoBehaviour
 
     private void Update()
     {
-        // Travel along the assigned direction. The direction is normalized so
-        // that diagonal directions don't produce faster movement.
+        // Travel along the assigned direction. Normalized so diagonal directions
+        // don't produce faster movement.
         transform.position += moveDirection.normalized * (speed * Time.deltaTime);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isPlayerOwned)
+        {
+            // Player bullets damage Enemies and Asteroids
+            if (other.CompareTag("Enemy"))
+            {
+                Enemy enemy = other.GetComponent<Enemy>();
+                if (enemy != null)
+                    enemy.TakeDamage(damage);
+
+                Destroy(gameObject);
+            }
+            else if (other.CompareTag("Asteroid"))
+            {
+                Asteroid asteroid = other.GetComponent<Asteroid>();
+                if (asteroid != null)
+                    asteroid.TakeDamage(damage);
+
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            // Enemy bullets damage the Player
+            if (other.CompareTag("Player"))
+            {
+                PlayerStats stats = other.GetComponent<PlayerStats>();
+                if (stats != null)
+                    stats.TakeDamage(damage);
+
+                Destroy(gameObject);
+            }
+        }
     }
 }

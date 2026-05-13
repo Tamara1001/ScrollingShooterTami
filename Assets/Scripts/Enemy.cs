@@ -220,7 +220,10 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
-        // TODO: Trigger explosion VFX, play sound, award points here
+        // Award score and increment kill counter via GameManager
+        GameManager.Instance?.RegisterEnemyKill();
+
+        // TODO: Trigger explosion VFX, play sound here
         Destroy(gameObject);
     }
 

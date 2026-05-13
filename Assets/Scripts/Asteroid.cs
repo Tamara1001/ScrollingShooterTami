@@ -28,12 +28,19 @@ public class Asteroid : MonoBehaviour
     [Tooltip("Z position threshold behind the player. The asteroid is destroyed once it passes this point.")]
     [SerializeField] private float destroyBehindZ = -15f;
 
+    [Header("Health")]
+    [Tooltip("Hit points this asteroid has before it is destroyed by player fire.")]
+    [SerializeField] private int maxHealth = 2;
+
     private float forwardSpeed;
     private Vector3 driftVelocity;
     private Vector3 spinVelocity;
+    private int currentHealth;
 
     private void Start()
     {
+        currentHealth = maxHealth;
+
         // --- Random Scale ---
         float randomScale = Random.Range(minScale, maxScale);
         transform.localScale = Vector3.one * randomScale;
@@ -71,5 +78,28 @@ public class Asteroid : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Combat
+    // -------------------------------------------------------------------------
+
+    /// <summary>Applies damage to this asteroid. Destroys it when health reaches zero.</summary>
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        // Award score via GameManager
+        GameManager.Instance?.RegisterAsteroidKill();
+
+        // TODO: Spawn debris VFX, play impact sound
+        Destroy(gameObject);
     }
 }

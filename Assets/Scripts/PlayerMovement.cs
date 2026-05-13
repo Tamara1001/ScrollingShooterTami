@@ -57,6 +57,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        // Block all input processing if the game is not in the Playing state
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+            return;
+
         ReadInput();
         MoveShip();
         ApplyTilt();
